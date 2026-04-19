@@ -967,34 +967,36 @@
                         ? `<div class="hot-banner"><span>🏆</span><span>热销第一 · TOP1</span></div>`
                         : '';
                     
+                    // 转义函数
+                    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+                    
                     // 图片
                     const imageHTML = product.image
-                        ? `<img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy" onerror="this.outerHTML='<div class=\\'product-image-placeholder\\'><span class=\\'placeholder-icon\\'>🖼️</span><span>暂无图片</span></div>'">`
+                        ? `<img src="${esc(product.image)}" alt="${esc(product.name)}" class="product-image" loading="lazy" onerror="this.outerHTML='<div class=\\'product-image-placeholder\\'><span class=\\'placeholder-icon\\'>🖼️</span><span>暂无图片</span></div>'">`
                         : `<div class="product-image-placeholder"><span class="placeholder-icon">🖼️</span><span>暂无图片</span></div>`;
                     
-                    // 按钮
+                    // 按钮 - 支持任意链接格式（网页链接/小程序路径/wechat scheme）
                     const btnClass = product.link ? 'product-btn' : 'product-btn disabled';
-                    const btnTarget = product.link ? `href="${product.link}" target="_blank" onclick="if(!${product.link}){event.preventDefault()}"` : `href="#" onclick="event.preventDefault()"`;
+                    const btnTag = product.link
+                        ? `<a class="${btnClass}" href="${esc(product.link)}" target="_blank"><span>🛒</span><span>前往查看详情</span></a>`
+                        : `<a class="${btnClass}" href="#" onclick="event.preventDefault()"><span>🛒</span><span>前往查看详情</span></a>`;
                     
                     card.innerHTML = `
                         ${hotBanner}
                         <div class="product-header">
                             <span class="product-rank">${product.rank}</span>
-                            <h3 class="product-title">${product.name}</h3>
-                            <span class="product-tag">${product.tag}</span>
+                            <h3 class="product-title">${esc(product.name)}</h3>
+                            <span class="product-tag">${esc(product.tag)}</span>
                         </div>
                         <div class="product-image-container">
                             ${imageHTML}
                         </div>
                         <div class="product-info">
                             <div class="product-label">产品介绍</div>
-                            <div class="product-target">${product.description}</div>
+                            <div class="product-target">${esc(product.description)}</div>
                         </div>
                         <p class="product-arrow">👉 点击查看正品详情</p>
-                        <a class="${btnClass}" ${btnTarget}>
-                            <span>🛒</span>
-                            <span>前往查看详情</span>
-                        </a>
+                        ${btnTag}
                     `;
                     list.appendChild(card);
                 });
