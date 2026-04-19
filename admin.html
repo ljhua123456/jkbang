@@ -218,6 +218,21 @@
         .image-preview-area:hover .preview-del { display: block; }
         .image-hint { font-size: 10px; color: #ccc; margin-top: 2px; }
 
+        /* 图片按钮行 */
+        .image-btn-row {
+            display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap;
+        }
+        .upload-btn {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 8px 14px; background: #e8f5e9; color: #2d7a50;
+            border: 1px solid #c8e6c9; border-radius: 8px;
+            font-size: 13px; cursor: pointer; white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .upload-btn:hover { background: #c8e6c9; }
+        .or-text { color: #aaa; font-size: 12px; white-space: nowrap; }
+        .image-btn-row .form-input { flex: 1; min-width: 0; }
+
         /* JSON弹窗 */
         .json-modal-overlay {
             display: none; position: fixed; inset: 0;
@@ -357,16 +372,16 @@
 <script>
 // ========== 数据 ==========
 const DEFAULT_PRODUCTS = [
-    {id:1,rank:1,name:"氨糖健骨片",tag:"关节养护",description:"采用高纯度氨基葡萄糖盐酸盐，配合软骨素科学配比，有效修复软骨组织，缓解关节疼痛与僵硬。适合长期久坐、关节劳损的中老年人群，每日2次，每次2粒，饭后温水送服。",image:"",link:""},
-    {id:2,rank:2,name:"液体钙+维生素D3",tag:"易吸收补钙",description:"液态钙剂配合维生素D3促进钙质吸收，小分子结构更易被人体利用。预防骨质疏松、增强骨骼强度，口感好易服用，适合钙流失加速的中老年群体。",image:"",link:""},
-    {id:3,rank:3,name:"GABA睡眠软糖",tag:"温和助眠",description:"添加γ-氨基丁酸（GABA）和酸枣仁提取物，天然温和配方，帮助改善睡眠质量，缓解入睡困难、多梦易醒等问题。软糖口感好，无依赖性。",image:"",link:""},
-    {id:4,rank:4,name:"深海鱼油软胶囊",tag:"心脑养护",description:"来自北极深海纯净海域的鱼油，EPA+DHA含量高达30%，有助于调节血脂、呵护心脑血管健康。每一粒都是大自然的馈赠。",image:"",link:""},
-    {id:5,rank:5,name:"叶黄素酯软糖",tag:"眼部护理",description:"富含叶黄素酯和蓝莓花青素，双重营养共同守护眼睛健康。缓解视疲劳、过滤蓝光伤害，适合长期看手机、电视的中老年用户。",image:"",link:""},
-    {id:6,rank:6,name:"成人复合维生素B族",tag:"能量补充",description:"科学配比8种B族维生素，维持神经系统正常运作，提升精力活力，改善睡眠质量，缓解精神焦虑与疲劳感。每日1片，轻松补充。",image:"",link:""},
-    {id:7,rank:7,name:"中老年益生菌",tag:"肠道调理",description:"专为中老年肠道环境设计，含多种活性益生菌菌株，调节肠道菌群平衡，改善便秘、腹胀等肠道问题，提升整体免疫力。",image:"",link:""},
-    {id:8,rank:8,name:"葛根枳椇子片",tag:"日常养护",description:"传统草本配方，葛根配伍枳椇子、枸杞子，清肝明目、舒筋活络。适合长期饮酒、久坐办公、颈椎不适的人群日常调理使用。",image:"",link:""},
-    {id:9,rank:9,name:"中老年高钙蛋白粉",tag:"营养补充",description:"优质动植物双蛋白配方，高钙含量，配合多种维生素和矿物质，全面补充中老年人每日所需营养，增强体质、提高免疫力。",image:"",link:""},
-    {id:10,rank:10,name:"艾草颈椎腰椎贴",tag:"外用舒缓",description:"甄选艾草、红花、川芎等草本植物提取物，配合远红外陶瓷粉，持续温热理疗。贴敷舒适，哪痛贴哪，方便使用，适合关节肌肉不适人群。",image:"",link:""}
+    {id:1,rank:1,name:"氨糖健骨片",tag:"关节养护",description:"氨基葡萄糖盐酸盐与软骨素配伍产品，属于关节营养类食品原料。适合关注关节灵活性、日常活动较多的中老年人群。具体效果因人而异，详见商品详情页。",image:"",link:""},
+    {id:2,rank:2,name:"液体钙+维生素D3",tag:"易吸收补钙",description:"以液态钙为主要形态，搭配维生素D3的营养组合产品。钙是人体常量矿物质，D3有助钙质吸收利用。适合饮食中钙摄入不足人群，具体补充方案请参考商品说明或咨询营养师。",image:"",link:""},
+    {id:3,rank:3,name:"GABA睡眠软糖",tag:"温和助眠",description:"含有γ-氨基丁酸（GABA）及酸枣仁提取物的食品形态产品。GABA是神经系统调节因子，软糖口感好，食用便捷。具体成分含量及适用人群请以购买页面为准。",image:"",link:""},
+    {id:4,rank:4,name:"深海鱼油软胶囊",tag:"心脑养护",description:"提取自深海鱼类，富含不饱和脂肪酸EPA和DHA。Omega-3不饱和脂肪酸是常见的膳食营养成分。适合日常饮食中深海鱼类摄入偏少的人群，具体含量请查看商品标签。",image:"",link:""},
+    {id:5,rank:5,name:"叶黄素酯软糖",tag:"眼部护理",description:"添加叶黄素酯和蓝莓花青素的食品形态产品。叶黄素酯是叶黄素的前体物质，属类胡萝卜素类营养素。适合用眼强度较高、日常蔬果摄入有限人群，具体成分以商品标签为准。",image:"",link:""},
+    {id:6,rank:6,name:"成人复合维生素B族",tag:"能量补充",description:"含多种B族维生素（B1/B2/B6/B12/叶酸等）的复合营养产品。B族维生素是水溶性维生素，参与人体能量代谢。适合饮食不均衡、蔬果摄入不足的成年人，具体请参考商品标签。",image:"",link:""},
+    {id:7,rank:7,name:"中老年益生菌",tag:"肠道调理",description:"含多种活性益生菌菌株的食品形态产品。益生菌是对宿主有益的活性微生物，肠道菌群平衡与日常消化舒适度相关。适合饮食结构单一、肠道舒适度欠佳人群，具体菌株信息请查看商品详情。",image:"",link:""},
+    {id:8,rank:8,name:"葛根枳椇子片",tag:"日常养护",description:"以葛根、枳椇子等草本植物为原料的食品形态产品。葛根为豆科植物葛的根茎，传统食养文化中有广泛应用。适合应酬较多、饮食偏油腻人群，具体成分及含量以商品标签为准。",image:"",link:""},
+    {id:9,rank:9,name:"中老年高钙蛋白粉",tag:"营养补充",description:"含优质动植物蛋白与钙质的营养类食品。蛋白质是生命基础物质，钙是骨骼和牙齿的主要成分。适合饮食单一、营养摄入不均衡人群，具体配方请参考商品标签。",image:"",link:""},
+    {id:10,rank:10,name:"艾草颈椎腰椎贴",tag:"外用舒缓",description:"含艾草提取物及草本植物成分的外用贴敷类产品。艾草为传统草本植物，艾灸及热敷是常见的日常养护方式。适合久坐、关节活动受限人群，具体使用方法请参考商品说明。",image:"",link:""}
 ];
 
 const DEFAULT_PWD = 'jkbang2026';
@@ -525,18 +540,27 @@ function renderProducts() {
             </div>
 
             <div class="form-group image-zone">
-                <label class="form-label">产品图片（粘贴图片URL）</label>
-                <div class="image-preview-area ${p.image ? 'has-img' : ''}" id="img-area-${idx}"
-                    onclick="document.getElementById('inp-img-${idx}').focus()">
+                <label class="form-label">产品图片</label>
+                <div class="image-preview-area ${p.image ? 'has-img' : ''}" id="img-area-${idx}">
                     ${p.image
-                        ? `<img src="${escapeHtml(p.image)}" alt="预览" onerror="onImgError(${idx})">`
-                        : `<span class="preview-icon">📷</span><span>点击输入框粘贴图片URL</span><span class="image-hint">支持淘宝/京东/图床等图片链接</span>`}
-                    ${p.image ? `<button class="preview-del" onclick="event.stopPropagation();delImage(${idx})">删除</button>` : ''}
+                        ? `<img src="${escapeHtml(p.image)}" alt="预览" onerror="onImgError(${idx})">
+                           <button class="preview-del" onclick="event.stopPropagation();delImage(${idx})">✕ 删除图片</button>`
+                        : `<div class="preview-empty" id="preview-empty-${idx}">
+                               <span class="preview-icon">🖼️</span>
+                               <span class="image-hint">支持本地上传或粘贴URL</span>
+                           </div>`}
                 </div>
-                <input type="text" class="form-input" id="inp-img-${idx}" value="${escapeHtml(p.image)}"
-                    placeholder="粘贴图片URL，如：https://img.alicdn.com/xxx.jpg"
-                    style="margin-top:6px;"
-                    oninput="onFieldChange(${idx}, 'image', this.value)">
+                <div class="image-btn-row">
+                    <label class="upload-btn" for="file-inp-${idx}">
+                        📤 上传本地图片
+                        <input type="file" accept="image/*" id="file-inp-${idx}" style="display:none"
+                            onchange="handleFileUpload(${idx}, this.files[0])">
+                    </label>
+                    <span class="or-text">或</span>
+                    <input type="text" class="form-input" id="inp-img-${idx}" value="${escapeHtml(p.image)}"
+                        placeholder="粘贴图片URL"
+                        oninput="onFieldChange(${idx}, 'image', this.value)">
+                </div>
             </div>
 
             <div class="form-group">
@@ -569,7 +593,10 @@ function onFieldChange(idx, field, value) {
                 <button class="preview-del" onclick="event.stopPropagation();delImage(${idx})">删除</button>`;
         } else {
             area.className = 'image-preview-area';
-            area.innerHTML = `<span class="preview-icon">📷</span><span>点击输入框粘贴图片URL</span><span class="image-hint">支持淘宝/京东/图床等图片链接</span>`;
+            area.innerHTML = `<div class="preview-empty">
+                <span class="preview-icon">🖼️</span>
+                <span class="image-hint">支持本地上传或粘贴URL</span>
+            </div>`;
         }
     }
 
@@ -580,10 +607,14 @@ function onFieldChange(idx, field, value) {
 function onImgError(idx) {
     const area = document.getElementById('img-area-' + idx);
     area.className = 'image-preview-area';
-    area.innerHTML = `<span class="preview-icon">📷</span><span>图片失效，点击重新输入URL</span><span class="image-hint">支持淘宝/京东/图床等图片链接</span>`;
+    area.innerHTML = `<div class="preview-empty">
+        <span class="preview-icon">🖼️</span>
+        <span class="image-hint">图片失效，请重新上传或输入URL</span>
+    </div>`;
     document.getElementById('inp-img-' + idx).value = '';
     products[idx].image = '';
     scheduleSave();
+    updateStats();
 }
 
 // 删除图片
@@ -591,10 +622,43 @@ function delImage(idx) {
     products[idx].image = '';
     const area = document.getElementById('img-area-' + idx);
     area.className = 'image-preview-area';
-    area.innerHTML = `<span class="preview-icon">📷</span><span>点击输入框粘贴图片URL</span><span class="image-hint">支持淘宝/京东/图床等图片链接</span>`;
+    area.innerHTML = `<div class="preview-empty" id="preview-empty-${idx}">
+        <span class="preview-icon">🖼️</span>
+        <span class="image-hint">支持本地上传或粘贴URL</span>
+    </div>`;
     document.getElementById('inp-img-' + idx).value = '';
     scheduleSave();
     updateStats();
+}
+
+// 本地上传图片（转base64）
+function handleFileUpload(idx, file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        showToast('⚠️ 请选择图片文件');
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('⚠️ 图片不能超过5MB');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        products[idx].image = dataUrl;
+        document.getElementById('inp-img-' + idx).value = dataUrl;
+        const area = document.getElementById('img-area-' + idx);
+        area.className = 'image-preview-area has-img';
+        area.innerHTML = `<img src="${dataUrl}" alt="预览">
+            <button class="preview-del" onclick="event.stopPropagation();delImage(${idx})">✕ 删除图片</button>`;
+        scheduleSave();
+        updateStats();
+        showToast('✅ 图片上传成功');
+    };
+    reader.onerror = function() {
+        showToast('⚠️ 图片读取失败，请重试');
+    };
+    reader.readAsDataURL(file);
 }
 
 // 更新统计
