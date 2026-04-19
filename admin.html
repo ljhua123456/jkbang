@@ -6,6 +6,68 @@
     <title>健康产品排行榜 - 管理后台</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* 登录页 */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #2d7a50, #4a9f71);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        #login-screen.hidden { display: none; }
+        .login-box {
+            background: #fff;
+            padding: 40px 36px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 340px;
+            max-width: 90vw;
+        }
+        .login-icon { font-size: 48px; margin-bottom: 12px; }
+        .login-title { font-size: 20px; font-weight: 700; color: #2d7a50; margin-bottom: 4px; }
+        .login-sub { font-size: 13px; color: #888; margin-bottom: 24px; }
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            text-align: center;
+            letter-spacing: 4px;
+            font-family: inherit;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+        .login-input:focus { outline: none; border-color: #4a9f71; }
+        .login-input.error { border-color: #e53935; animation: shake 0.4s; }
+        @keyframes shake {
+            0%,100%{transform:translateX(0)}
+            20%,60%{transform:translateX(-6px)}
+            40%,80%{transform:translateX(6px)}
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #2d7a50, #4a9f71);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .login-btn:hover { opacity: 0.9; }
+        .login-hint {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 14px;
+        }
+        .login-hint a { color: #4a9f71; cursor: pointer; text-decoration: underline; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
             background: #f0f2f5;
@@ -306,6 +368,39 @@
     </style>
 </head>
 <body>
+    <!-- 登录页 -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="login-icon">🔐</div>
+            <div class="login-title">管理后台</div>
+            <div class="login-sub">请输入访问密码</div>
+            <input type="password" class="login-input" id="login-pwd" placeholder="请输入密码" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()">
+            <button class="login-btn" onclick="doLogin()">登 录</button>
+            <div class="login-hint">
+                首次登录默认密码 <strong>jkbang2026</strong><br>
+                <a onclick="showChangePwd()">修改密码</a> · <a onclick="resetPassword()">忘记密码</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码弹窗 -->
+    <div id="change-pwd-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:12px;padding:28px 24px;width:320px;max-width:90vw;">
+            <div style="font-size:16px;font-weight:700;color:#2d7a50;margin-bottom:16px;text-align:center;">🔑 修改密码</div>
+            <div style="font-size:12px;color:#888;margin-bottom:12px;">新密码（6-20位）</div>
+            <input type="password" id="new-pwd" class="login-input" style="text-align:left;letter-spacing:0;" placeholder="输入新密码">
+            <div style="font-size:12px;color:#888;margin:10px 0 12px;">确认新密码</div>
+            <input type="password" id="confirm-pwd" class="login-input" style="text-align:left;letter-spacing:0;" placeholder="再次输入新密码" onkeydown="if(event.key==='Enter')submitChangePwd()">
+            <button class="login-btn" onclick="submitChangePwd()">确认修改</button>
+            <div style="text-align:center;margin-top:10px;">
+                <a onclick="closeChangePwd()" style="font-size:13px;color:#888;cursor:pointer;">取消</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容（登录后显示） -->
+    <div id="main-content" style="display:none;">
+    
     <div class="container">
         <!-- 顶部 -->
         <header class="header">
@@ -608,6 +703,102 @@
         });
 
         init();
+        
+        // ========== 登录相关 ==========
+        const DEFAULT_PWD = 'jkbang2026';
+        
+        function getPassword() {
+            return localStorage.getItem('admin_pwd') || DEFAULT_PWD;
+        }
+        
+        function doLogin() {
+            const pwd = document.getElementById('login-pwd').value;
+            const storedPwd = getPassword();
+            if (pwd === storedPwd) {
+                sessionStorage.setItem('admin_logged_in', '1');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                const input = document.getElementById('login-pwd');
+                input.classList.add('error');
+                input.value = '';
+                input.placeholder = '密码错误，请重试';
+                setTimeout(() => {
+                    input.classList.remove('error');
+                    input.placeholder = '请输入密码';
+                }, 1200);
+            }
+        }
+        
+        function showChangePwd() {
+            document.getElementById('change-pwd-modal').style.display = 'flex';
+        }
+        
+        function closeChangePwd() {
+            document.getElementById('change-pwd-modal').style.display = 'none';
+            document.getElementById('new-pwd').value = '';
+            document.getElementById('confirm-pwd').value = '';
+        }
+        
+        function submitChangePwd() {
+            const newPwd = document.getElementById('new-pwd').value;
+            const confirmPwd = document.getElementById('confirm-pwd').value;
+            if (newPwd.length < 6 || newPwd.length > 20) {
+                alert('密码长度需6-20位');
+                return;
+            }
+            if (newPwd !== confirmPwd) {
+                alert('两次密码不一致');
+                return;
+            }
+            localStorage.setItem('admin_pwd', newPwd);
+            closeChangePwd();
+            showToast('✅ 密码修改成功！');
+        }
+        
+        function resetPassword() {
+            if (confirm('确定要重置密码吗？\n重置后密码恢复为默认：jkbang2026\n此操作不可撤销。')) {
+                localStorage.removeItem('admin_pwd');
+                sessionStorage.removeItem('admin_logged_in');
+                document.getElementById('login-pwd').value = '';
+                alert('密码已重置为默认：jkbang2026\n请重新登录。');
+            }
+        }
+        
+        // 页面加载时检查登录状态
+        function checkLogin() {
+            if (sessionStorage.getItem('admin_logged_in') === '1') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('login-pwd').focus();
+            }
+        }
+        
+        // 登出按钮
+        function addLogoutBtn() {
+            const toolbar = document.querySelector('.toolbar');
+            if (!toolbar) return;
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-secondary';
+            btn.style.cssText = 'margin-left:auto;background:#e53935;';
+            btn.innerHTML = '🚪 退出登录';
+            btn.onclick = () => {
+                sessionStorage.removeItem('admin_logged_in');
+                location.reload();
+            };
+            toolbar.appendChild(btn);
+        }
+        
+        // 页面加载时检查 + 加登出按钮
+        checkLogin();
+        addLogoutBtn();
+        
+        init();
     </script>
-</body>
+    
+    <!-- 关闭主内容div -->
+    </div>
 </html>
