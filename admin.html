@@ -67,7 +67,6 @@
             color: #aaa;
             margin-top: 14px;
         }
-        .login-hint a { color: #4a9f71; cursor: pointer; text-decoration: underline; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
             background: #f0f2f5;
@@ -116,6 +115,21 @@
             align-items: center;
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
+        .settings-bar {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 14px 20px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #856404;
+        }
+        .settings-bar .lock-icon { font-size: 18px; }
+        .settings-bar span { flex: 1; }
         .toolbar .info {
             font-size: 13px;
             color: #888;
@@ -376,10 +390,7 @@
             <div class="login-sub">请输入访问密码</div>
             <input type="password" class="login-input" id="login-pwd" placeholder="请输入密码" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()">
             <button class="login-btn" onclick="doLogin()">登 录</button>
-            <div class="login-hint">
-                首次登录默认密码 <strong>jkbang2026</strong><br>
-                <a onclick="showChangePwd()">修改密码</a> · <a onclick="resetPassword()">忘记密码</a>
-            </div>
+            <div class="login-hint">请输入正确密码进入管理后台</div>
         </div>
     </div>
 
@@ -428,6 +439,13 @@
                 <div class="stat-value" id="stat-links">0</div>
                 <div class="stat-label">已设置链接</div>
             </div>
+        </div>
+        
+        <!-- 安全设置区 -->
+        <div class="settings-bar">
+            <span class="lock-icon">🔐</span>
+            <span>当前已登录 · 密码保护中</span>
+            <button class="btn btn-secondary" onclick="showChangePwd()">🔑 修改密码</button>
         </div>
         
         <!-- 工具栏 -->
@@ -754,15 +772,6 @@
             localStorage.setItem('admin_pwd', newPwd);
             closeChangePwd();
             showToast('✅ 密码修改成功！');
-        }
-        
-        function resetPassword() {
-            if (confirm('确定要重置密码吗？\n重置后密码恢复为默认：jkbang2026\n此操作不可撤销。')) {
-                localStorage.removeItem('admin_pwd');
-                sessionStorage.removeItem('admin_logged_in');
-                document.getElementById('login-pwd').value = '';
-                alert('密码已重置为默认：jkbang2026\n请重新登录。');
-            }
         }
         
         // 页面加载时检查登录状态
