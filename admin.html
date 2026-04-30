@@ -39,6 +39,7 @@
         }
         .login-input:focus { outline: none; border-color: #4a9f71; }
         .login-input.error { border-color: #e53935; animation: shake 0.4s; }
+        .login-input.left { text-align: left; letter-spacing: 0; }
         @keyframes shake {
             0%,100%{transform:translateX(0)}
             20%,60%{transform:translateX(-6px)}
@@ -61,7 +62,7 @@
         .modal-overlay.show { display: flex; }
         .modal {
             background: #fff; border-radius: 12px; padding: 28px 24px;
-            width: 320px; max-width: 90vw;
+            width: 380px; max-width: 90vw;
         }
         .modal-title { font-size: 16px; font-weight: 700; color: #2d7a50; margin-bottom: 16px; text-align: center; }
         .modal-hint { font-size: 12px; color: #888; margin: 10px 0 6px; }
@@ -71,6 +72,7 @@
             color: #fff; border: none; border-radius: 8px;
             font-size: 14px; cursor: pointer;
         }
+        .modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .modal-cancel {
             text-align: center; margin-top: 10px;
             font-size: 13px; color: #888; cursor: pointer;
@@ -104,6 +106,17 @@
         }
         .settings-bar span { flex: 1; }
 
+        /* GitHub状态条 */
+        .github-bar {
+            background: #e8f5e9; border: 1px solid #c8e6c9;
+            padding: 14px 20px; border-radius: 10px;
+            margin-bottom: 16px; display: flex;
+            align-items: center; gap: 12px; flex-wrap: wrap;
+            font-size: 13px; color: #2e7d32;
+        }
+        .github-bar.disconnected { background: #fff3e0; border-color: #ffe0b2; color: #e65100; }
+        .github-bar span { flex: 1; }
+
         /* 工具栏 */
         .toolbar {
             background: #fff; padding: 14px 20px; border-radius: 10px;
@@ -121,12 +134,15 @@
         }
         .btn-primary { background: #4a9f71; color: #fff; }
         .btn-primary:hover { background: #2d7a50; }
+        .btn-success { background: #43a047; color: #fff; }
+        .btn-success:hover { background: #2e7d32; }
         .btn-secondary { background: #6c757d; color: #fff; }
         .btn-secondary:hover { background: #5a6268; }
         .btn-warning { background: #ffc107; color: #333; }
         .btn-warning:hover { background: #e0a800; }
         .btn-danger { background: #e53935; color: #fff; }
         .btn-danger:hover { background: #c62828; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* Toast */
         .toast {
@@ -138,6 +154,8 @@
             transition: transform 0.3s;
         }
         .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #43a047; }
+        .toast.error { background: #e53935; }
 
         /* 统计 */
         .stats-row {
@@ -268,6 +286,21 @@
             padding: 12px 20px; border-top: 1px solid #eee;
             display: flex; gap: 10px; justify-content: flex-end;
         }
+
+        /* 发布进度条 */
+        .publish-progress {
+            display: none; margin: 12px 0;
+            background: #f0f0f0; border-radius: 4px; overflow: hidden;
+        }
+        .publish-progress.show { display: block; }
+        .publish-progress-bar {
+            height: 4px; background: #4a9f71;
+            transition: width 0.3s;
+        }
+        .publish-log {
+            font-size: 11px; color: #888; margin-top: 6px;
+            font-family: monospace; max-height: 60px; overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -289,11 +322,30 @@
         <div class="modal">
             <div class="modal-title">🔑 修改密码</div>
             <div class="modal-hint">新密码（6-20位）</div>
-            <input type="password" id="new-pwd" class="login-input" style="text-align:left;letter-spacing:0;" placeholder="输入新密码">
+            <input type="password" id="new-pwd" class="login-input left" placeholder="输入新密码">
             <div class="modal-hint">确认新密码</div>
-            <input type="password" id="confirm-pwd" class="login-input" style="text-align:left;letter-spacing:0;" placeholder="再次输入新密码" onkeydown="if(event.key==='Enter')submitChangePwd()">
+            <input type="password" id="confirm-pwd" class="login-input left" placeholder="再次输入新密码" onkeydown="if(event.key==='Enter')submitChangePwd()">
             <button class="modal-btn" onclick="submitChangePwd()">确认修改</button>
             <div class="modal-cancel" onclick="closeChangePwd()">取消</div>
+        </div>
+    </div>
+
+    <!-- GitHub配置弹窗 -->
+    <div class="modal-overlay" id="github-modal">
+        <div class="modal" style="width: 420px;">
+            <div class="modal-title">⚙️ GitHub 配置</div>
+            <div class="modal-hint">GitHub Personal Access Token</div>
+            <input type="password" id="github-token" class="login-input left" placeholder="ghp_xxxxxxxxxxxx" style="letter-spacing:0;">
+            <div style="font-size:10px;color:#888;margin-top:2px;">
+                <a href="https://github.com/settings/tokens/new?scopes=repo&description=jkbang-admin" target="_blank" style="color:#4a9f71;">点击生成 Token →</a>
+                （勾选 repo 权限）
+            </div>
+            <div class="modal-hint">仓库 Owner（用户名）</div>
+            <input type="text" id="github-owner" class="login-input left" placeholder="ljhua123456" value="ljhua123456">
+            <div class="modal-hint">仓库名称</div>
+            <input type="text" id="github-repo" class="login-input left" placeholder="jkbang" value="jkbang">
+            <button class="modal-btn" id="save-github-btn" onclick="saveGitHubConfig()">保存配置</button>
+            <div class="modal-cancel" onclick="closeGitHubModal()">取消</div>
         </div>
     </div>
 
@@ -304,12 +356,18 @@
             <header class="header">
                 <div>
                     <h1>🏥 健康产品管理后台</h1>
-                    <p>编辑产品信息后，点击「复制JSON」发给我推送上线</p>
+                    <p>编辑产品信息后，点击「🚀 立即发布」直接更新网站</p>
                 </div>
                 <div class="header-links">
                     <a href="index.html" target="_blank">📺 预览网站</a>
                 </div>
             </header>
+
+            <!-- GitHub状态条 -->
+            <div class="github-bar" id="github-bar">
+                <span id="github-status-text">🔗 GitHub 未连接</span>
+                <button class="btn btn-secondary" onclick="showGitHubModal()">⚙️ 配置</button>
+            </div>
 
             <!-- 安全提示条 -->
             <div class="settings-bar">
@@ -339,7 +397,13 @@
                 <span class="info" id="save-status">💾 输入即自动保存</span>
                 <button class="btn btn-warning" onclick="resetAll()">🔄 恢复默认</button>
                 <button class="btn btn-secondary" onclick="showJsonModal()">📋 查看JSON</button>
-                <button class="btn btn-primary" onclick="copyJson()">📋 复制JSON</button>
+                <button class="btn btn-success" id="publish-btn" onclick="publishToGitHub()" disabled>🚀 立即发布</button>
+            </div>
+
+            <!-- 发布进度 -->
+            <div class="publish-progress" id="publish-progress">
+                <div class="publish-progress-bar" id="publish-progress-bar" style="width:0%"></div>
+                <div class="publish-log" id="publish-log"></div>
             </div>
 
             <!-- 产品编辑 -->
@@ -370,6 +434,10 @@
     </div>
 
 <script>
+// ========== 配置 ==========
+const GITHUB_API = 'https://api.github.com';
+const FILE_PATH = 'products.json';
+
 // ========== 数据 ==========
 const DEFAULT_PRODUCTS = [
     {id:1,rank:1,name:"氨糖健骨片",tag:"关节养护",description:"采用高纯度氨基葡萄糖盐酸盐，配合软骨素科学配比，有效修复软骨组织，缓解关节疼痛与僵硬。适合长期久坐、关节劳损的中老年人群，每日2次，每次2粒，饭后温水送服。",image:"",link:""},
@@ -387,6 +455,187 @@ const DEFAULT_PRODUCTS = [
 const DEFAULT_PWD = 'jkbang2026';
 let products = [];
 let autoSaveTimer = null;
+let fileSha = null; // GitHub文件SHA
+
+// ========== GitHub 配置 ==========
+function getGitHubConfig() {
+    return {
+        token: localStorage.getItem('gh_token') || '',
+        owner: localStorage.getItem('gh_owner') || '',
+        repo: localStorage.getItem('gh_repo') || ''
+    };
+}
+
+function updateGitHubStatus() {
+    const config = getGitHubConfig();
+    const bar = document.getElementById('github-bar');
+    const text = document.getElementById('github-status-text');
+    const btn = document.getElementById('publish-btn');
+
+    if (config.token && config.owner && config.repo) {
+        bar.classList.remove('disconnected');
+        text.textContent = `✅ 已连接 ${config.owner}/${config.repo}`;
+        btn.disabled = false;
+    } else {
+        bar.classList.add('disconnected');
+        text.textContent = '⚠️ GitHub 未配置完整';
+        btn.disabled = true;
+    }
+}
+
+function showGitHubModal() {
+    const config = getGitHubConfig();
+    document.getElementById('github-token').value = config.token;
+    document.getElementById('github-owner').value = config.owner;
+    document.getElementById('github-repo').value = config.repo;
+    document.getElementById('github-modal').classList.add('show');
+}
+
+function closeGitHubModal() {
+    document.getElementById('github-modal').classList.remove('show');
+}
+
+function saveGitHubConfig() {
+    const token = document.getElementById('github-token').value.trim();
+    const owner = document.getElementById('github-owner').value.trim();
+    const repo = document.getElementById('github-repo').value.trim();
+
+    if (!token) {
+        showToast('⚠️ 请输入 GitHub Token', 'error');
+        return;
+    }
+    if (!owner || !repo) {
+        showToast('⚠️ 请填写完整的仓库信息', 'error');
+        return;
+    }
+
+    localStorage.setItem('gh_token', token);
+    localStorage.setItem('gh_owner', owner);
+    localStorage.setItem('gh_repo', repo);
+
+    closeGitHubModal();
+    updateGitHubStatus();
+    showToast('✅ GitHub 配置已保存', 'success');
+
+    // 验证连接
+    verifyGitHubConnection();
+}
+
+async function verifyGitHubConnection() {
+    const config = getGitHubConfig();
+    try {
+        const res = await fetch(`${GITHUB_API}/repos/${config.owner}/${config.repo}/contents/${FILE_PATH}`, {
+            headers: { 'Authorization': `token ${config.token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            fileSha = data.sha;
+            showToast('✅ GitHub 连接成功', 'success');
+        } else if (res.status === 404) {
+            fileSha = null; // 文件不存在，将创建新文件
+            showToast('📄 文件不存在，将创建新文件', 'success');
+        } else {
+            showToast('⚠️ GitHub 连接失败', 'error');
+        }
+    } catch (e) {
+        showToast('⚠️ 网络错误，无法连接 GitHub', 'error');
+    }
+}
+
+// ========== 发布到 GitHub ==========
+async function publishToGitHub() {
+    const config = getGitHubConfig();
+    if (!config.token || !config.owner || !config.repo) {
+        showToast('⚠️ 请先配置 GitHub', 'error');
+        showGitHubModal();
+        return;
+    }
+
+    const btn = document.getElementById('publish-btn');
+    const progress = document.getElementById('publish-progress');
+    const progressBar = document.getElementById('publish-progress-bar');
+    const log = document.getElementById('publish-log');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ 发布中...';
+    progress.classList.add('show');
+    progressBar.style.width = '20%';
+    log.textContent = '';
+
+    function addLog(msg) {
+        log.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+        log.scrollTop = log.scrollHeight;
+    }
+
+    try {
+        // Step 1: 获取当前文件的 SHA
+        addLog('📡 正在获取文件信息...');
+        progressBar.style.width = '30%';
+
+        let sha = null;
+        const getRes = await fetch(`${GITHUB_API}/repos/${config.owner}/${config.repo}/contents/${FILE_PATH}`, {
+            headers: { 'Authorization': `token ${config.token}` }
+        });
+
+        if (getRes.ok) {
+            const getData = await getRes.json();
+            sha = getData.sha;
+            addLog('✅ 文件存在，获取 SHA 成功');
+        } else if (getRes.status === 404) {
+            addLog('📄 文件不存在，将创建新文件');
+        } else {
+            throw new Error(`获取文件失败: ${getRes.status}`);
+        }
+
+        progressBar.style.width = '50%';
+
+        // Step 2: 生成 JSON
+        addLog('📝 正在生成 JSON 数据...');
+        const jsonContent = generateJson();
+        const base64Content = btoa(unescape(encodeURIComponent(jsonContent)));
+        addLog('✅ JSON 生成完成');
+
+        progressBar.style.width = '70%';
+
+        // Step 3: 上传文件
+        addLog('🚀 正在上传到 GitHub...');
+        const commitMsg = `Update products - ${new Date().toLocaleString('zh-CN')}`;
+
+        const putData = {
+            message: commitMsg,
+            content: base64Content
+        };
+        if (sha) putData.sha = sha;
+
+        const putRes = await fetch(`${GITHUB_API}/repos/${config.owner}/${config.repo}/contents/${FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${config.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(putData)
+        });
+
+        if (putRes.ok || putRes.status === 201) {
+            progressBar.style.width = '100%';
+            addLog('🎉 发布成功！网站将在 1-2 分钟后自动更新');
+            showToast('🎉 发布成功！', 'success');
+        } else {
+            const errData = await putRes.json();
+            throw new Error(errData.message || `上传失败: ${putRes.status}`);
+        }
+
+    } catch (e) {
+        addLog(`❌ 错误: ${e.message}`);
+        showToast(`❌ 发布失败: ${e.message}`, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🚀 立即发布';
+        setTimeout(() => {
+            progress.classList.remove('show');
+        }, 3000);
+    }
+}
 
 // ========== 登录 ==========
 function getPassword() {
@@ -430,16 +679,16 @@ function submitChangePwd() {
     const newPwd = document.getElementById('new-pwd').value;
     const confirmPwd = document.getElementById('confirm-pwd').value;
     if (newPwd.length < 6 || newPwd.length > 20) {
-        showToast('⚠️ 密码长度需6-20位');
+        showToast('⚠️ 密码长度需6-20位', 'error');
         return;
     }
     if (newPwd !== confirmPwd) {
-        showToast('⚠️ 两次密码不一致');
+        showToast('⚠️ 两次密码不一致', 'error');
         return;
     }
     localStorage.setItem('admin_pwd', newPwd);
     closeChangePwd();
-    showToast('✅ 密码修改成功');
+    showToast('✅ 密码修改成功', 'success');
 }
 
 function checkLogin() {
@@ -461,6 +710,7 @@ async function init() {
         try {
             products = JSON.parse(saved);
             renderAll();
+            updateGitHubStatus();
             return;
         } catch(e) {}
     }
@@ -472,6 +722,7 @@ async function init() {
             products = data.products;
             saveLocal();
             renderAll();
+            updateGitHubStatus();
             return;
         }
     } catch(e) {}
@@ -479,6 +730,7 @@ async function init() {
     products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
     saveLocal();
     renderAll();
+    updateGitHubStatus();
 }
 
 function saveLocal() {
@@ -636,11 +888,11 @@ function delImage(idx) {
 function handleFileUpload(idx, file) {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-        showToast('⚠️ 请选择图片文件');
+        showToast('⚠️ 请选择图片文件', 'error');
         return;
     }
     if (file.size > 5 * 1024 * 1024) {
-        showToast('⚠️ 图片不能超过5MB');
+        showToast('⚠️ 图片不能超过5MB', 'error');
         return;
     }
     const reader = new FileReader();
@@ -654,10 +906,10 @@ function handleFileUpload(idx, file) {
             <button class="preview-del" onclick="event.stopPropagation();delImage(${idx})">✕ 删除图片</button>`;
         scheduleSave();
         updateStats();
-        showToast('✅ 图片上传成功');
+        showToast('✅ 图片上传成功', 'success');
     };
     reader.onerror = function() {
-        showToast('⚠️ 图片读取失败，请重试');
+        showToast('⚠️ 图片读取失败，请重试', 'error');
     };
     reader.readAsDataURL(file);
 }
@@ -676,7 +928,7 @@ function resetAll() {
     products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
     saveLocal();
     renderAll();
-    showToast('🔄 已恢复默认');
+    showToast('🔄 已恢复默认', 'success');
 }
 
 // ========== JSON ==========
@@ -705,7 +957,7 @@ function copyJson() {
     const json = generateJson();
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(json).then(() => {
-            showToast('✅ JSON已复制，发给我即可！');
+            showToast('✅ JSON已复制', 'success');
             closeJsonModal();
         }).catch(() => copyFallback(json));
     } else {
@@ -719,15 +971,15 @@ function copyFallback(text) {
     ta.select();
     document.execCommand('copy');
     ta.setAttribute('readonly', true);
-    showToast('✅ JSON已复制，发给我即可！');
+    showToast('✅ JSON已复制', 'success');
     closeJsonModal();
 }
 
 // ========== 工具 ==========
-function showToast(msg) {
+function showToast(msg, type = '') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.classList.add('show');
+    t.className = 'toast show' + (type ? ' ' + type : '');
     setTimeout(() => t.classList.remove('show'), 2500);
 }
 
@@ -735,6 +987,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         closeJsonModal();
         closeChangePwd();
+        closeGitHubModal();
     }
 });
 
