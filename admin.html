@@ -485,9 +485,13 @@ function updateGitHubStatus() {
 
 function showGitHubModal() {
     const config = getGitHubConfig();
-    document.getElementById('github-token').value = config.token;
-    document.getElementById('github-owner').value = config.owner;
-    document.getElementById('github-repo').value = config.repo;
+    // 只有当 localStorage 有值时才填充，避免覆盖用户输入
+    if (config.token) document.getElementById('github-token').value = config.token;
+    if (config.owner) document.getElementById('github-owner').value = config.owner;
+    if (config.repo) document.getElementById('github-repo').value = config.repo;
+    // 如果都没有值，设置默认值
+    if (!config.owner) document.getElementById('github-owner').value = 'ljhua123456';
+    if (!config.repo) document.getElementById('github-repo').value = 'jkbang';
     document.getElementById('github-modal').classList.add('show');
 }
 
@@ -504,8 +508,14 @@ function saveGitHubConfig() {
         showToast('⚠️ 请输入 GitHub Token', 'error');
         return;
     }
-    if (!owner || !repo) {
-        showToast('⚠️ 请填写完整的仓库信息', 'error');
+    if (!owner) {
+        showToast('⚠️ 请输入仓库 Owner（用户名）', 'error');
+        document.getElementById('github-owner').focus();
+        return;
+    }
+    if (!repo) {
+        showToast('⚠️ 请输入仓库名称', 'error');
+        document.getElementById('github-repo').focus();
         return;
     }
 
