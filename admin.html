@@ -485,13 +485,9 @@ function updateGitHubStatus() {
 
 function showGitHubModal() {
     const config = getGitHubConfig();
-    // 只有当 localStorage 有值时才填充，避免覆盖用户输入
+    // 只填充 localStorage 中有值的字段，保留 HTML 的 value 属性作为默认值
     if (config.token) document.getElementById('github-token').value = config.token;
-    if (config.owner) document.getElementById('github-owner').value = config.owner;
-    if (config.repo) document.getElementById('github-repo').value = config.repo;
-    // 如果都没有值，设置默认值
-    if (!config.owner) document.getElementById('github-owner').value = 'ljhua123456';
-    if (!config.repo) document.getElementById('github-repo').value = 'jkbang';
+    // owner 和 repo 让 HTML 的 value 属性决定（已有默认值 ljhua123456 和 jkbang）
     document.getElementById('github-modal').classList.add('show');
 }
 
